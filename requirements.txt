@@ -3,7 +3,6 @@ asgiref==3.8.1
 dj-database-url==2.2.0
 Django==5.2.1
 psycopg2-binary==2.9.9
-
 git-filter-repo==2.47.0
 packaging==24.2
 pefile==2023.2.7
