@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-0$qfdex4*rns17&!tf%s$0(&19!1-4-dje+tm$n2jx+5e37$@e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['prizeclaw.vercel.app', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['prize-claw.vercel.app', '127.0.0.1', 'localhost']
 
 
 import os
@@ -96,8 +96,12 @@ WSGI_APPLICATION = 'prize_claw_simulation.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'prize_claw_db',  
+        'USER': 'postgres',           
+        'PASSWORD': 'EsLee08182002#',   
+        'HOST': 'localhost',           
+        'PORT': '5432',                    
     }
 }
 
