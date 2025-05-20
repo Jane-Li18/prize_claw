@@ -1,0 +1,52 @@
+<style>
+    .social-icons a {
+        margin: 0 10px;
+        color: white;
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .social-icons a:hover {
+        transform: translateY(-5px) scale(1.1);
+        color: #ccc;
+    }
+
+    .shining-text {
+        font-size: 10px;
+        animation: shine 1.5s infinite;
+        background: linear-gradient(90deg, #888, #ccc, #888); /* Neutral gray tones */
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+    }
+    
+    @keyframes shine {
+        0% {
+            background-position: 200% 0;
+        }
+        100% {
+            background-position: -200% 0;
+        }
+    }
+    
+</style>
+
+<footer class="footer mt-5 py-3" style="background-color: #555; color: white;">
+    <div class="container text-center">
+        <div class="social-icons" style="font-size: 1.3rem;">
+            <a href="https://www.facebook.com/shanelee.jabonillo/">
+                <i class="fa-brands fa-facebook"></i>
+            </a>
+            <a href="https://github.com/Jane-Li18">
+                <i class="fa-brands fa-github"></i>
+            </a>
+            <a href="mailto:shanelee.jabonillo18@gmail.com">
+                <i class="fa-regular fa-envelope"></i>
+            </a>
+            <a href="https://discord.gg/ZBTz6rS5">
+                <i class="fa-brands fa-discord"></i>
+            </a>
+        </div>
+        <span class="shining-text">ⓒ JaneLi | May 2025</span>
+    </div>
+</footer>

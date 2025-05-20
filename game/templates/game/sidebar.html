@@ -1,0 +1,187 @@
+<style>
+    .sidebar .sub-navbar-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .sidebar .sub-navbar-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-decoration: none;
+        padding: 10px 15px;
+    }
+
+    .sidebar .sub-navbar-item:hover {
+        background-color: var(--navbar-txt);
+        color: var(--navbar-bg);
+    }
+
+    .sidebar .sub-navbar-item span {
+        flex-grow: 1;
+        text-align: left;
+    }
+
+    .sidebar .sub-navbar-item i {
+        margin-left: 10px;
+    }
+
+    .sidebar .sub-navbar-item ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin-top: 10px;
+    }
+
+    .sidebar .sub-navbar-item ul li {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .sidebar .sub-navbar-item ul li:last-child {
+        border-bottom: none;
+    }
+
+    .sidebar .offcanvas-header {
+        background-color: var(--navbar-bg);
+        color: var(--navbar-txt);
+    }
+
+    .sidebar .offcanvas-body {
+        background-color: var(--bg-primary);
+        color: var(--txt-primary);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+
+    .sidebar .theme-toggle-container {
+        display: flex;
+        justify-content: right;
+        padding: 10px;
+        border-top: 1px solid var(--txt-primary);
+        margin-top: auto;
+    }
+
+    .sidebar #theme-toggle {
+        background-color: var(--navbar-bg);
+        color: var(--navbar-txt);
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .sidebar #theme-toggle:hover {
+        background-color: var(--navbar-txt);
+        color: var(--navbar-bg);
+    }
+
+    .sidebar .btn-close {
+        filter: invert(1);
+        opacity: 1;
+        transition: filter 0.3s ease;
+    }
+
+    [data-theme="dark"] .sidebar .btn-close {
+        filter: invert(1);
+    }
+
+    .sidebar .leaderboards-container {
+        background-color: var(--navbar-txt);
+        color: var(--navbar-bg);
+    }
+
+    .sidebar .leaderboards-container ul {
+        transition: background-color 0.3s ease, color 0.3s ease; /* Add transition */
+    }
+    
+    .sidebar .leaderboards-container li {
+        transition: background-color 0.3s ease, color 0.3s ease; /* Add transition */
+    }
+</style>
+
+<aside class="body-sidebar sidebar">
+    <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="bdSidebar" aria-labelledby="bdSidebarOffcanvasLabel">
+      <div class="offcanvas-header border-bottom">
+          <h5 class="offcanvas-title" id="bdSidebarOffcanvasLabel"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close" data-bs-target="#bdSidebar"></button>
+      </div>
+
+      <div class="offcanvas-body">
+        <nav class="body-links w-100" id="bd-docs-nav" aria-label="Docs navigation">
+          <ul class="bd-links-nav list-unstyled mb-0 pb-3 pb-md-2 pe-lg-2">
+              <li class="bd-links-group py-2">
+                  <ul class="list-unstyled fw-normal pb-2 small">
+                    <li>
+                        <a href="{% url "main" %}" class="sub-navbar-item body-link rounded">
+                            <span>Game</span>
+                            <i class="fas fa-gamepad"></i>
+                        </a>
+                    </li>
+                      <li>
+                          <a href="{% url "prize" %}" class="sub-navbar-item body-link rounded">
+                              <span>Prizes</span>
+                              <i class="fas fa-gift"></i>
+                          </a>
+                      </li>
+                      <li>
+                        <a href="{% url "feedback" %}" class="sub-navbar-item body-link rounded">
+                            <span>Feedback</span>
+                            <i class="fa-solid fa-paperclip"></i>
+                        </a>
+                    </li>
+                  </ul>
+              </li>
+          </ul>
+        </nav>
+
+        <!-- Leaderboard -->
+        <div class="mb-3">
+            <a href="#" class="sub-navbar-item body-link rounded non-clickable">
+                <span>Leaderboards</span>
+                <i class="fas fa-trophy" style="color: orange;"></i>
+            </a>
+            <ul style="padding: 10px 15px;">
+                {% for entry in leaderboard %}
+                <li style="display: flex; justify-content: space-between;">
+                    <span>{{ entry.player_name }}</span>
+                    <span>{{ entry.score }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+          <!-- Other Players' Scores -->
+          {% comment %} <div class="mb-3">
+              <a href="#" class="sub-navbar-item body-link rounded non-clickable">
+                  <span>Other Players' Scores</span>
+                  <i class="fas fa-users"></i>
+              </a>
+              <ul>
+                  {% for entry in other_players_scores %}
+                  <li style="display: flex; justify-content: space-between;">
+                      <span>{{ entry.player_name }}</span>
+                      <span>{{ entry.score }}</span>
+                  </li>
+                  {% endfor %}
+              </ul>
+          </div> {% endcomment %}
+      </nav>
+
+      <!-- Dark mode toggle button at the bottom -->
+      <div class="theme-toggle-container">
+          <button id="theme-toggle" class="btn">
+              <i class="ri-moon-line"></i>
+          </button>
+      </div>
+  </div>
+</div>
+</aside>

@@ -1,0 +1,854 @@
+{% extends "game/main.html" %}
+{% load static %}
+{% block title %}Feedback{% endblock title %}
+
+{% block content %}
+
+<style>
+    .feedback-textarea {
+        padding: 10px;
+        resize: none;
+        width: 100%; 
+        height: 250px;
+    }
+
+    .modal-header {
+        background-color: #555; 
+        color: white; 
+    }
+
+
+    .form-control:disabled {
+        background-color: #e9ecef; 
+        color: #6c757d; 
+        opacity: 1; 
+    }
+
+    .input-group-text.disabled {
+        background-color: #e9ecef;
+        color: #6c757d;
+    }
+
+    .btn:disabled {
+        background-color: #6c757d; 
+        color: white; 
+    }
+
+    .modal-body {
+        color: black;
+    }
+
+    /* Cube Loader Styles */
+    .cube-loader {
+        --uib-size: 45px;
+        --uib-color: #555;
+        --uib-speed: 1.75s;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        width: var(--uib-size);
+        height: calc(var(--uib-size) * 0.6);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .cube-loader .cube {
+        flex-shrink: 0;
+        width: calc(var(--uib-size) * 0.2);
+        height: calc(var(--uib-size) * 0.2);
+        animation: jump var(--uib-speed) ease-in-out infinite;
+    }
+    
+    .cube-loader .cube__inner {
+        display: block;
+        height: 100%;
+        width: 100%;
+        border-radius: 25%;
+        background-color: var(--uib-color);
+        transform-origin: center bottom;
+        animation: morph var(--uib-speed) ease-in-out infinite;
+    }
+    
+    .cube-loader .cube:nth-child(2) {
+        animation-delay: calc(var(--uib-speed) * -0.36);
+    }
+    .cube-loader .cube:nth-child(2) .cube__inner {
+        animation-delay: calc(var(--uib-speed) * -0.36);
+    }
+    
+    .cube-loader .cube:nth-child(3) {
+        animation-delay: calc(var(--uib-speed) * -0.2);
+    }
+    .cube-loader .cube:nth-child(3) .cube__inner {
+        animation-delay: calc(var(--uib-speed) * -0.2);
+    }
+    
+    @keyframes jump {
+        0% { transform: translateY(0px); }
+        30% { transform: translateY(0px); animation-timing-function: ease-out; }
+        50% { transform: translateY(-200%); animation-timing-function: ease-in; }
+        75% { transform: translateY(0px); animation-timing-function: ease-in; }
+    }
+    
+    @keyframes morph {
+        0% { transform: scaleY(1); }
+        10% { transform: scaleY(1); }
+        20%, 25% { transform: scaleY(0.6) scaleX(1.3); animation-timing-function: ease-in-out; }
+        30% { transform: scaleY(1.15) scaleX(0.9); animation-timing-function: ease-in-out; }
+        40% { transform: scaleY(1); }
+        70%, 85%, 100% { transform: scaleY(1); }
+        75% { transform: scaleY(0.8) scaleX(1.2); }
+    }
+    
+    .prize-image {
+        display: block;
+        width: 80px;
+        height: auto;
+        position: absolute;
+        top: 320px;
+        left: 10px;
+        transform: scaleX(-1);
+        filter: FlipH;
+        z-index: 10;
+        cursor: pointer;
+        transition: all 0.5s ease;
+    }
+    
+    .paw-print {
+        position: absolute;
+        font-size: 22px;
+        color: #cccc;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 9;
+        animation: pawAppear 5s linear forwards;
+    }
+    @keyframes pawAppear {
+        0% { opacity: 0; transform: scale(0.7) rotate(0deg); }
+        10% { opacity: 0.9; transform: scale(1.1) rotate(5deg); }
+        80% { opacity: 0.8; transform: scale(1); }
+        100% { opacity: 0; transform: scale(0.5) rotate(-5deg); }
+    }
+    
+    #moving-cat {
+        transition: transform 0.3s ease-in-out;
+    }
+    
+    .jumping {
+        animation: catJump 0.5s ease;
+    }
+    
+    .rolling {
+        animation: catRoll 0.5s linear infinite;
+    }
+    
+    @keyframes catJump {
+        0%, 100% { transform: translateY(0) scaleX(var(--flip)); }
+        50% { transform: translateY(-60px) scaleX(var(--flip)); }
+    }
+    
+    @keyframes catRoll {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+    
+    
+    #feedbackForm {
+        position: relative;
+        overflow: hidden;
+        {% comment %} border: 1px solid #ddd; {% endcomment %}
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+    
+    .star-rating {
+        cursor: pointer;
+        display: inline-flex;
+        position: relative;
+        gap: 5px;
+    }
+    
+    .star-rating .star {
+        color: #ccc;
+        transition: color 0.2s ease-in-out;
+        position: relative;
+        padding: 0 2px;
+        font-size: 24px;
+    }
+    
+    .star-rating .star.hovered {
+        color: #ffcc00;
+    }
+    
+    .star-rating .star.selected {
+        color: #ffcc00;
+    }
+    
+    .star-rating .star.half-selected i.fa-star {
+        color: #ffcc00; 
+    }
+    
+    .star-rating .star.half-selected i.fa-star-half-stroke {
+        color: #ffcc00; 
+    }
+    
+    #rating-value {
+        margin-left: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        min-width: 30px; 
+        text-align: center; 
+    }
+    
+    .star-rating-container {
+        display: inline-flex; 
+        align-items: center; 
+        gap: 10px; 
+    }
+    
+    
+    
+</style>
+
+<div class="container mt-5">
+    <h2 class="text-center">Feedback Form</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form id="feedbackForm" method="POST" action="{% url 'submit_feedback' %}" style="position: relative;">
+                {% csrf_token %}
+                <div class="form-group mt-3">
+                    <label for="email">Your Email:</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" style="border-radius: 0px; border-top-left-radius: 0.25rem; border-bottom-left-radius: 0.25rem;">@</span>
+                        </div>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group mt-3 text-center">
+                        <div class="star-rating-container d-flex justify-content-center align-items-center">
+                            <div class="star-rating">
+                                <span class="star" data-value="1"><i class="fa-solid fa-star"></i></span>
+                                <span class="star" data-value="2"><i class="fa-solid fa-star"></i></span>
+                                <span class="star" data-value="3"><i class="fa-solid fa-star"></i></span>
+                                <span class="star" data-value="4"><i class="fa-solid fa-star"></i></span>
+                                <span class="star" data-value="5"><i class="fa-solid fa-star"></i></span>
+                            </div>
+                            <span id="rating-value" class="ml-2">0</span>
+                        </div>
+                        <input type="hidden" id="rating" name="rating" value="0">
+                    </div>
+                    
+                    
+                    
+                </div>
+                <div class="form-group mt-3 position-relative">
+                    <label for="feedback">Message Here:</label>
+                    <textarea class="form-control feedback-textarea" id="feedback" name="feedback" rows="6" maxlength="500" required placeholder="Put message here!"></textarea>
+                    
+                    <small id="charCount" class="form-text text-muted position-absolute" style="bottom: 5px; right: 10px; font-size: 0.6rem; background: rgba(255, 255, 255, 0.8); width: auto;">0/500</small>
+                    
+                    
+                    <!-- Loading Overlay (now inside textarea container) -->
+                    <div class="textarea-loading-overlay" style="
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        display: none;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 10;
+                    ">
+                        <!-- Cube loader centered -->
+                        <div class="cube-loader">
+                            <div class="cube"><div class="cube__inner"></div></div>
+                            <div class="cube"><div class="cube__inner"></div></div>
+                            <div class="cube"><div class="cube__inner"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cat image -->
+                <img src="{% static 'prizes/Cat.png' %}" class="prize-image" id="moving-cat">
+
+                <!-- YouTube IFrame -->
+                <div id="youtube-player"></div>
+                
+                <!-- Submit button (cat magnet on hover) -->
+                <div class="d-flex justify-content-center mt-1">
+                    <button type="submit" class="btn" id="submit-btn">SUBMIT &nbsp;<i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+                <div class="mt-1 text-center"> 
+                    <span class="shining-text">Press the cat to move away!</span>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Modal for Success Message -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document"> <!-- Added modal-dialog-centered -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Success</h5>
+            </div>
+            <div class="modal-body">
+                Your feedback has been submitted successfully!
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    
+        // Initialize the YouTube player
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '0', // Hide the player
+                width: '0',
+                videoId: 'WsTb8HYZd-U', // Replace with your YouTube video ID
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
+        }
+
+        // When the player is ready
+        function onPlayerReady(event) {
+            // Add click event listener to the cat image
+            const catImage = document.getElementById('moving-cat');
+            catImage.addEventListener('click', () => {
+                playYouTubeSound();
+            });
+        }
+
+        // Play the YouTube sound
+        function playYouTubeSound() {
+            if (player && player.playVideo) {
+                player.seekTo(0); // Restart the video
+                player.playVideo();
+            }
+        }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Cat behavior code
+        const cat = document.getElementById('moving-cat');
+        const submitBtn = document.getElementById('submit-btn');
+        const form = document.getElementById('feedbackForm');
+        let formRect = form.getBoundingClientRect();
+        let currentPos = { x: 10, y: 320 };
+        let isMoving = false;
+        let moveInterval;
+        let jumpInterval;
+        let pawQueue = [];
+        let lastPawTime = 0;
+        let isBlockingSubmit = false;
+        let isVisible = true;
+        let isOnButton = false;
+        let isCooldown = false;
+    
+        // Cat dimensions
+        const catWidth = 80;
+        const catHeight = 60;
+    
+
+        // Load the YouTube IFrame API
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        let player;
+
+
+
+
+
+        // Constrain the cat's position within the form
+        function constrainPosition(pos) {
+            return {
+                x: Math.max(0, Math.min(pos.x, form.offsetWidth - catWidth)),
+                y: Math.max(0, Math.min(pos.y, form.offsetHeight - catHeight))
+            };
+        }
+    
+        // Generate destinations within the form
+        function generateDestinations() {
+            const formWidth = form.offsetWidth;
+            const formHeight = form.offsetHeight;
+    
+            return [
+                { x: 50, y: 150 }, // Near the textarea
+                { x: formWidth * 0.7, y: 50 }, // Top right
+                { x: formWidth / 2 - 40, y: formHeight / 2 - 30 }, // Center
+                { x: 20, y: formHeight - 100 } // Bottom left
+            ];
+        }
+    
+        // Generate additional random destinations within the form
+        function generateRandomDestinations(count = 6) {
+            const destinations = [];
+            const formWidth = form.offsetWidth;
+            const formHeight = form.offsetHeight;
+    
+            for (let i = 0; i < count; i++) {
+                const randomX = Math.random() * (formWidth - catWidth);
+                const randomY = Math.random() * (formHeight - catHeight);
+                destinations.push(constrainPosition({ x: randomX, y: randomY }));
+            }
+            return destinations;
+        }
+    
+        // Initialize destinations
+        let destinations = [...generateDestinations(), ...generateRandomDestinations()];
+    
+        // Recalculate destinations when the form size changes
+        function recalculateDestinations() {
+            destinations = [...generateDestinations(), ...generateRandomDestinations()];
+        }
+    
+        // Move the cat to a destination
+        function moveCat(destination = null, specialAction = null, speedMultiplier = 1) {
+            if (isMoving || !isVisible) return;
+            isMoving = true;
+    
+            const dest = destination ? constrainPosition(destination) :
+                constrainPosition(destinations[Math.floor(Math.random() * destinations.length)]);
+    
+            const distance = Math.sqrt(Math.pow(dest.x - currentPos.x, 2) + Math.pow(dest.y - currentPos.y, 2));
+            const duration = Math.min(2000, distance * 3) / speedMultiplier;
+    
+            const startTime = performance.now();
+            const startX = currentPos.x;
+            const startY = currentPos.y;
+    
+            const controlX = startX + (dest.x - startX) * 0.5 + (Math.random() - 0.5) * 200;
+            const controlY = startY + (dest.y - startY) * 0.5 + (Math.random() - 0.5) * 200;
+    
+            const shouldFlip = dest.x > currentPos.x;
+            cat.style.transform = shouldFlip ? 'scaleX(-1)' : 'scaleX(1)';
+    
+            const willJump = specialAction === 'jump';
+            const willRoll = specialAction === 'roll';
+            let jumpCompleted = false;
+    
+            if (willRoll) cat.classList.add('rolling');
+    
+            function animate(currentTime) {
+                if (!isVisible) {
+                    isMoving = false;
+                    return;
+                }
+    
+                const elapsed = currentTime - startTime;
+                let progress = Math.min(elapsed / duration, 1);
+    
+                if (willJump && !jumpCompleted) {
+                    const jumpProgress = Math.min(elapsed / (duration * 0.4), 1);
+                    const jumpHeight = Math.sin(jumpProgress * Math.PI) * 60;
+    
+                    currentPos = constrainPosition({
+                        x: quadraticBezier(startX, controlX, dest.x, progress),
+                        y: quadraticBezier(startY, controlY, dest.y, progress) - jumpHeight
+                    });
+    
+                    cat.style.left = `${currentPos.x}px`;
+                    cat.style.top = `${currentPos.y}px`;
+    
+                    if (jumpProgress >= 1) jumpCompleted = true;
+                }
+    
+                if (!willJump) {
+                    currentPos = constrainPosition({
+                        x: quadraticBezier(startX, controlX, dest.x, progress),
+                        y: quadraticBezier(startY, controlY, dest.y, progress)
+                    });
+    
+                    cat.style.left = `${currentPos.x}px`;
+                    cat.style.top = `${currentPos.y}px`;
+                }
+    
+                if ((!willJump || jumpCompleted) && elapsed > 150 && elapsed % 150 < 16) {
+                    const now = Date.now();
+                    if (now - lastPawTime > 150) {
+                        pawQueue.push({ x: currentPos.x, y: currentPos.y, facingRight: shouldFlip, time: now });
+                        lastPawTime = now;
+                    }
+                }
+    
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isMoving = false;
+                    if (Math.random() > 0.6);
+                    cat.style.transform = shouldFlip ? 'scaleX(-1)' : 'scaleX(1)';
+    
+                    if (willRoll) cat.classList.remove('rolling');
+                    if (destination && isPointNearButton(currentPos)) isOnButton = true;
+                }
+            }
+    
+            requestAnimationFrame(animate);
+        }
+    
+        // Quadratic Bezier formula
+        function quadraticBezier(start, control, end, t) {
+            return (1 - t) * (1 - t) * start + 2 * (1 - t) * t * control + t * t * end;
+        }
+    
+        // Check if the cat is near the submit button
+        function isPointNearButton(pos) {
+            const btnRect = submitBtn.getBoundingClientRect();
+            const formRect = form.getBoundingClientRect();
+            const btnCenterX = btnRect.left - formRect.left + btnRect.width / 2;
+            const btnCenterY = btnRect.top - formRect.top + btnRect.height / 2;
+    
+            return Math.abs(pos.x - btnCenterX) < 60 && Math.abs(pos.y - btnCenterY) < 60;
+        }
+    
+        // Create paw prints
+        function createPawPrint(x, y, facingRight) {
+            if (!isVisible) return;
+    
+            for (let i = 0; i < 3; i++) {
+                const paw = document.createElement('i');
+                paw.className = 'fa-solid fa-paw paw-print';
+    
+                const offsetX = facingRight ? [-15, -25, -5][i] : [15, 25, 5][i];
+                const offsetY = [65, 70, 60][i];
+    
+                paw.style.left = `${x + 40 + offsetX}px`;
+                paw.style.top = `${y + offsetY}px`;
+                paw.style.transform = facingRight ? `scaleX(-1) rotate(${10 + i * 5}deg)` : `rotate(${-10 - i * 5}deg)`;
+                paw.style.animationDelay = `${i * 100}ms`;
+    
+                form.appendChild(paw);
+                setTimeout(() => paw.remove(), 5000);
+            }
+        }
+    
+        // Process paw print queue
+        setInterval(() => {
+            const now = Date.now();
+            while (pawQueue.length > 0 && now - pawQueue[0].time > 150) {
+                const { x, y, facingRight } = pawQueue.shift();
+                createPawPrint(x, y, facingRight);
+            }
+        }, 50);
+    
+        // Block the submit button
+        function blockSubmitButton() {
+            if (isBlockingSubmit || !isVisible) return;
+            isBlockingSubmit = true;
+    
+            const btnRect = submitBtn.getBoundingClientRect();
+            const formRect = form.getBoundingClientRect();
+            const centerX = (btnRect.left + btnRect.width / 2) - formRect.left - 40;
+            const centerY = (btnRect.top + btnRect.height / 2) - formRect.top - 40;
+    
+            moveCat({ x: centerX, y: centerY }, null, 3);
+            submitBtn.style.pointerEvents = 'none';
+            isOnButton = true;
+    
+            jumpInterval = setInterval(() => {
+                if (isVisible && isOnButton) jumpInPlace();
+            }, 2000);
+        }
+    
+        // Make the cat jump in place
+        function jumpInPlace(callback) {
+            if (!isVisible) return;
+    
+            const jumpHeight = 60;
+            const jumpDuration = 500;
+            const startY = currentPos.y;
+            const startTime = performance.now();
+    
+            function jumpAnimation(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / jumpDuration, 1);
+                const jumpProgress = Math.sin(progress * Math.PI);
+    
+                currentPos.y = startY - (jumpHeight * jumpProgress);
+                cat.style.top = `${currentPos.y}px`;
+    
+                if (progress < 1) {
+                    requestAnimationFrame(jumpAnimation);
+                } else if (callback) callback();
+            }
+    
+            requestAnimationFrame(jumpAnimation);
+        }
+    
+        // Click handler for the cat
+        cat.addEventListener('click', function (e) {
+            e.stopPropagation();
+        
+            if (isMoving || !isVisible || isCooldown) return;
+        
+            // Set cooldown
+            isCooldown = true;
+            setTimeout(() => {
+                isCooldown = false;
+            }, 5000); // 5 seconds cooldown
+        
+            clearInterval(moveInterval);
+            clearInterval(jumpInterval);
+            isBlockingSubmit = false;
+            isOnButton = false;
+        
+            // Play YouTube sound
+            playYouTubeSound();
+        
+            jumpInPlace(() => startMovementCycle());
+        });
+        
+    
+        // Submit button hover effects
+        submitBtn.addEventListener('mouseenter', () => {
+            if (!isVisible || isCooldown) return; // Prevent interaction during cooldown
+
+            clearInterval(moveInterval);
+            clearInterval(jumpInterval);
+
+            const btnRect = submitBtn.getBoundingClientRect();
+            const formRect = form.getBoundingClientRect();
+            const centerX = (btnRect.left + btnRect.width / 2) - formRect.left - 40;
+            const centerY = (btnRect.top + btnRect.height / 2) - formRect.top - 40;
+
+            moveCat({ x: centerX, y: centerY }, null, 3);
+            submitBtn.style.pointerEvents = 'none';
+            isOnButton = true;
+
+            blockSubmitButton();
+        });
+
+    
+        submitBtn.addEventListener('mouseleave', () => {
+            if (!isVisible) return;
+    
+            submitBtn.style.pointerEvents = 'auto';
+            isOnButton = false;
+    
+            clearInterval(jumpInterval);
+            isBlockingSubmit = false;
+    
+            setTimeout(() => {
+                if (isVisible && !isOnButton) startMovementCycle();
+            }, 300);
+        });
+    
+        // Start the movement cycle
+        function startMovementCycle() {
+            if (!isVisible || isOnButton) return;
+    
+            clearInterval(moveInterval);
+            moveInterval = setInterval(() => {
+                if (!isMoving && !isBlockingSubmit && isVisible && !isOnButton) {
+                    const randDest = destinations[Math.floor(Math.random() * destinations.length)];
+                    const actionRoll = Math.random();
+                    const action = actionRoll > 0.6 ? (actionRoll > 0.8 ? 'jump' : 'roll') : null;
+    
+                    moveCat(randDest, action);
+                }
+            }, 2000);
+    
+            if (!isOnButton) moveCat();
+        }
+    
+        // ResizeObserver to handle form size changes
+        const resizeObserver = new ResizeObserver(() => {
+            formRect = form.getBoundingClientRect();
+            currentPos = constrainPosition(currentPos);
+            cat.style.left = `${currentPos.x}px`;
+            cat.style.top = `${currentPos.y}px`;
+            recalculateDestinations();
+        });
+    
+        resizeObserver.observe(form);
+    
+        startMovementCycle();
+    
+        // Form handling code
+        const feedback = document.getElementById('feedback');
+        const charCount = document.getElementById('charCount');
+    
+        feedback.addEventListener('input', function () {
+            const maxLength = 500;
+            const currentLength = this.value.length;
+            charCount.textContent = `${currentLength}/${maxLength}`;
+        });
+    
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+        const csrftoken = getCookie('csrftoken');
+    
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+        
+            const email = document.getElementById('email').value.trim();
+            const feedback = document.getElementById('feedback').value.trim();
+            const rating = document.getElementById('rating').value;
+        
+            if (!email || !feedback) {
+                alert('Please fill in both fields');
+                return;
+            }
+        
+            document.querySelector('.textarea-loading-overlay').style.display = 'block';
+            this.querySelectorAll('input, textarea, select, button').forEach(input => input.disabled = true);
+        
+            // Submit the form data via fetch
+            fetch('/submit-feedback/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    email: email,
+                    feedback: feedback,
+                    rating: rating
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show the Bootstrap modal for success
+                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    successModal.show();
+                    form.reset();
+                } else {
+                    alert('There was an error submitting your feedback: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(() => {
+                alert('There was an error submitting your feedback.');
+            })
+            .finally(() => {
+                document.querySelector('.textarea-loading-overlay').style.display = 'none';
+                this.querySelectorAll('input, textarea, select, button').forEach(input => input.disabled = false);
+            });
+        });
+        
+    
+        // Star rating code
+        const stars = $('.star-rating .star');
+        const ratingInput = $('#rating');
+        const ratingValue = $('#rating-value');
+
+        stars.on('mousemove', function (e) {
+            const star = $(this);
+            const starWidth = star.width();
+            const offsetX = e.offsetX;
+            const value = star.data('value');
+
+            // Determine if the hover is on the left or right half of the star
+            if (offsetX < starWidth / 2) {
+                // Half-star hover
+                star.addClass('hovered').prevAll().addClass('hovered');
+                star.nextAll().removeClass('hovered');
+                star.find('i').removeClass('fa-star').addClass('fa-star-half-stroke'); // Change to half-star
+                ratingValue.text(value - 0.5);
+            } else {
+                // Full-star hover
+                star.addClass('hovered').prevAll().addClass('hovered');
+                star.nextAll().removeClass('hovered');
+                star.find('i').removeClass('fa-star-half-stroke').addClass('fa-star'); // Change to full-star
+                ratingValue.text(value);
+            }
+        });
+
+        stars.on('mouseleave', function () {
+            // Reset hovered state, but keep selected stars colorized
+            stars.removeClass('hovered');
+            stars.find('i').removeClass('fa-star-half-stroke').addClass('fa-star'); // Reset to full stars
+
+            // Reapply selected state based on the current rating
+            const currentRating = parseFloat(ratingInput.val());
+            stars.each(function () {
+                const star = $(this);
+                const value = star.data('value');
+
+                if (currentRating >= value) {
+                    // Full star selected
+                    star.addClass('selected');
+                    star.find('i').removeClass('fa-star-half-stroke').addClass('fa-star');
+                } else if (currentRating >= value - 0.5) {
+                    // Half star selected
+                    star.addClass('selected');
+                    star.find('i').removeClass('fa-star').addClass('fa-star-half-stroke');
+                } else {
+                    // Not selected
+                    star.removeClass('selected');
+                }
+            });
+
+            ratingValue.text(currentRating);
+        });
+
+        stars.on('click', function (e) {
+            const star = $(this);
+            const starWidth = star.width();
+            const offsetX = e.offsetX;
+            const value = star.data('value');
+
+            // Determine if the click is on the left or right half of the star
+            if (offsetX < starWidth / 2) {
+                ratingInput.val(value - 0.5);
+                ratingValue.text(value - 0.5);
+            } else {
+                ratingInput.val(value);
+                ratingValue.text(value);
+            }
+
+            // Update star selection
+            stars.removeClass('selected');
+            stars.find('i').removeClass('fa-star-half-stroke').addClass('fa-star'); // Reset all stars to full
+
+            const currentRating = parseFloat(ratingInput.val());
+            stars.each(function () {
+                const star = $(this);
+                const value = star.data('value');
+
+                if (currentRating >= value) {
+                    // Full star selected
+                    star.addClass('selected');
+                    star.find('i').removeClass('fa-star-half-stroke').addClass('fa-star');
+                } else if (currentRating >= value - 0.5) {
+                    // Half star selected
+                    star.addClass('selected');
+                    star.find('i').removeClass('fa-star').addClass('fa-star-half-stroke');
+                }
+            });
+        });
+
+    });
+    
+</script>
+
+
+{% endblock content %}
