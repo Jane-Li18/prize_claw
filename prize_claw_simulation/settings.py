@@ -100,13 +100,10 @@ DATABASES = {
         'NAME': 'prize_claw_db',  
         'USER': 'postgres',           
         'PASSWORD': 'EsLee08182002#',   
-        'HOST': 'localhost', 'aws-0-us-east-2.pooler.supabase.com'          
+        'HOST': 'localhost',           
         'PORT': '5432',                    
     }
 }
-
-SUPABASE_URL = os.getenv('SUPABASE_URL')
-SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY')
 
 
 # Password validation

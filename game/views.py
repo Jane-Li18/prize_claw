@@ -1,4 +1,5 @@
-import random, os
+import random
+import os
 from django.shortcuts import render, redirect, get_object_or_404
 import json
 from django.http import JsonResponse
@@ -9,14 +10,14 @@ from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.conf import settings
 from django.contrib import messages
+from supabase import create_client, Client
 import logging
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
-url = settings.SUPABASE_URL  # Use environment variables for sensitive data
-key = settings.SUPABASE_ANON_KEY
-supabase: Client = create_client(url, key)
-
+# Load environment variables from .env file
+load_dotenv()
 
 @csrf_exempt
 def submit_feedback(request):
@@ -104,6 +105,7 @@ def claw_machine(request):
     # Select at least one rare prize (0.1 to 0.5)
     rare_prizes = [prize for prize in valid_prizes if 0.1 <= prize.probability < 0.5]
     active_prizes = []
+    selected_rare_prize = None  # Initialize to None
 
     if rare_prizes:  # If there are rare prizes available
         selected_rare_prize = random.choice(rare_prizes)
@@ -115,7 +117,7 @@ def claw_machine(request):
     # Fill the rest of the prizes to ensure total is 6
     while len(active_prizes) < (6 - len(built_in_prizes)):
         selected_prize = weighted_random_choice(valid_prizes)
-        if selected_prize and selected_rare_prize.name != selected_prize.name:
+        if selected_prize and (selected_rare_prize is None or selected_rare_prize.name != selected_prize.name):
             active_prizes.append({
                 'name': selected_prize.name,
                 'image': selected_prize.image.url
@@ -130,9 +132,6 @@ def claw_machine(request):
 
     # Otherwise, render the HTML template
     return render(request, 'game/claw_machine.html', {'prizes': all_prizes})
-
-
-
 
 
 def main(request):
@@ -205,15 +204,16 @@ def upload_prizes(request):
                 return JsonResponse({'status': 'error', 'message': 'Mismatch in data length.'}, status=400)
 
             for file, name, probability in zip(files, prize_names, probabilities):
-                if not name.strip():  # Check if prize name is emptys
+                if not name.strip():  # Check if prize name is empty
                     return JsonResponse({'status': 'error', 'message': 'Prize name cannot be empty.'}, status=400)
 
-                prize, created = Prize.objects.get_or_create(
-                    name=name.strip(),
-                    defaults={'probability': float(probability), 'image': file}
-                )
-                if not created:
-                    logger.debug(f"Prize already exists: {name}")
+                # Here you would use the Supabase client to create a new entry
+                supabase.table('prizes').insert({
+                    'name': name.strip(),
+                    'probability': float(probability),
+                    # Note: You'll need to handle file uploads to Supabase storage separately
+                    # This is just a placeholder for how you might structure your data
+                }).execute()
 
             return JsonResponse({'status': 'success', 'message': 'Prizes uploaded successfully!'})
 
