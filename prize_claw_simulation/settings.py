@@ -99,9 +99,10 @@ import dj_database_url
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres.dusbhirtbgkfkzldqoob:EsLee08182002#@aws-0-us-east-2.pooler.supabase.com:6543/postgres'
+        default='postgresql://postgres.dusbhirtbgkfkzldqoob:EsLee08182002%23@aws-0-us-east-2.pooler.supabase.com:6543/postgres'
     )
 }
+
 
 
 # Password validation
