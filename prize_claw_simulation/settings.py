@@ -35,12 +35,13 @@ ALLOWED_HOSTS = ['prizeclaw.vercel.app', '127.0.0.1', 'localhost']
 
 
 import os
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+from pathlib import Path
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'game/static'),  # Path to your static files
-]
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
