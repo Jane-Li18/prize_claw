@@ -13,6 +13,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+url = settings.SUPABASE_URL  # Use environment variables for sensitive data
+key = settings.SUPABASE_ANON_KEY
+supabase: Client = create_client(url, key)
+
+
 @csrf_exempt
 def submit_feedback(request):
     if request.method == 'POST':
@@ -200,7 +205,7 @@ def upload_prizes(request):
                 return JsonResponse({'status': 'error', 'message': 'Mismatch in data length.'}, status=400)
 
             for file, name, probability in zip(files, prize_names, probabilities):
-                if not name.strip():  # Check if prize name is empty
+                if not name.strip():  # Check if prize name is emptys
                     return JsonResponse({'status': 'error', 'message': 'Prize name cannot be empty.'}, status=400)
 
                 prize, created = Prize.objects.get_or_create(

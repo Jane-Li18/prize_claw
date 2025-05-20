@@ -94,15 +94,19 @@ WSGI_APPLICATION = 'prize_claw_simulation.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-import os
-import dj_database_url
-
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://postgres.dusbhirtbgkfkzldqoob:EsLee08182002%23@aws-0-us-east-2.pooler.supabase.com:6543/postgres'
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'prize_claw_db',  
+        'USER': 'postgres',           
+        'PASSWORD': 'EsLee08182002#',   
+        'HOST': 'localhost', 'aws-0-us-east-2.pooler.supabase.com'          
+        'PORT': '5432',                    
+    }
 }
 
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY')
 
 
 # Password validation
