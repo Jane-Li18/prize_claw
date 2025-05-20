@@ -1,5 +1,4 @@
-import random
-import os
+import random, os
 from django.shortcuts import render, redirect, get_object_or_404
 import json
 from django.http import JsonResponse
@@ -10,14 +9,9 @@ from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.conf import settings
 from django.contrib import messages
-from supabase import create_client, Client
 import logging
-from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
-
-# Load environment variables from .env file
-load_dotenv()
 
 @csrf_exempt
 def submit_feedback(request):
@@ -207,13 +201,12 @@ def upload_prizes(request):
                 if not name.strip():  # Check if prize name is empty
                     return JsonResponse({'status': 'error', 'message': 'Prize name cannot be empty.'}, status=400)
 
-                # Here you would use the Supabase client to create a new entry
-                supabase.table('prizes').insert({
-                    'name': name.strip(),
-                    'probability': float(probability),
-                    # Note: You'll need to handle file uploads to Supabase storage separately
-                    # This is just a placeholder for how you might structure your data
-                }).execute()
+                prize, created = Prize.objects.get_or_create(
+                    name=name.strip(),
+                    defaults={'probability': float(probability), 'image': file}
+                )
+                if not created:
+                    logger.debug(f"Prize already exists: {name}")
 
             return JsonResponse({'status': 'success', 'message': 'Prizes uploaded successfully!'})
 
