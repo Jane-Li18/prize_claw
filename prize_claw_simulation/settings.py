@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-0$qfdex4*rns17&!tf%s$0(&19!1-4-dje+tm$n2jx+5e37$@e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['prize-claw.vercel.app']
 
 import os
 STATIC_URL = '/static/'
