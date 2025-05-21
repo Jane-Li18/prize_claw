@@ -97,11 +97,11 @@ WSGI_APPLICATION = 'prize_claw_simulation.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'prize_claw_db'),  
-        'USER': os.environ.get('DB_USER', 'postgre'),           
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'FHwpyoyCdonyNn82zj7auE7kqRnyPRrt'),  # Use environment variable
-        'HOST': os.environ.get('DB_HOST', 'dpg-d0m56k3e5dus73bkfbk0-a'),           
-        'PORT': os.environ.get('DB_PORT', '5432'),                    
+        'NAME': 'prize_claw_db',
+        'USER': 'postgre',
+        'PASSWORD': 'FHwpyoyCdonyNn82zj7auE7kqRnyPRrt',
+        'HOST': 'dpg-d0m56k3e5dus73bkfbk0-a.singapore-postgres.render.com',
+        'PORT': '5432',
     }
 }
 
