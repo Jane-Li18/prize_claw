@@ -97,11 +97,14 @@ WSGI_APPLICATION = 'prize_claw_simulation.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'prize_claw_db',
-        'USER': 'postgre',
-        'PASSWORD': 'FHwpyoyCdonyNn82zj7auE7kqRnyPRrt',
-        'HOST': 'dpg-d0m56k3e5dus73bkfbk0-a.singapore-postgres.render.com',
-        'PORT': '5432',
+        'NAME': 'postgres',
+        'USER': 'postgres.lfhkgzpnkeaspxglxqdf',  # Note the format!
+        'PASSWORD': '@Jane_Li08182002#',
+        'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com',
+        'PORT': '6543',  # Pooler uses 6543
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
 
