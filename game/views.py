@@ -13,6 +13,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from supabase import create_client, Client
+
+SUPABASE_URL = "https://lfhkgzpnkeaspxglxqdf.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmaGtnenBua2Vhc3B4Z2x4cWRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3OTA5ODUsImV4cCI6MjA2MzM2Njk4NX0.fdJXMHmfMs0EH-rA0rl2CaWAv9DevdpKr1j7B3MZhSo"  # Get from Supabase → Project Settings → API
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
 @csrf_exempt
 def submit_feedback(request):
     if request.method == 'POST':
@@ -198,15 +206,24 @@ def upload_prizes(request):
                 return JsonResponse({'status': 'error', 'message': 'Mismatch in data length.'}, status=400)
 
             for file, name, probability in zip(files, prize_names, probabilities):
-                if not name.strip():  # Check if prize name is empty
+                if not name.strip():
                     return JsonResponse({'status': 'error', 'message': 'Prize name cannot be empty.'}, status=400)
 
+                # Upload file to Supabase Storage
+                file_path = f"prizes/{file.name}"
+                supabase.storage().from_("bucket_name").upload(file_path, file.read())
+
+                # Get public URL
+                image_url = supabase.storage().from_("bucket_name").get_public_url(file_path)
+
+                # Save prize with Supabase URL
                 prize, created = Prize.objects.get_or_create(
                     name=name.strip(),
-                    defaults={'probability': float(probability), 'image': file}
+                    defaults={
+                        'probability': float(probability),
+                        'image': image_url  # Store URL instead of file
+                    }
                 )
-                if not created:
-                    logger.debug(f"Prize already exists: {name}")
 
             return JsonResponse({'status': 'success', 'message': 'Prizes uploaded successfully!'})
 
