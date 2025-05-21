@@ -1,4 +1,4 @@
-import random, os
+import random, os, uuid
 from django.shortcuts import render, redirect, get_object_or_404
 import json
 from django.http import JsonResponse
@@ -113,7 +113,7 @@ def claw_machine(request):
         selected_rare_prize = random.choice(rare_prizes)
         active_prizes.append({
             'name': selected_rare_prize.name,
-            'image': selected_rare_prize.image.url
+            'image': selected_rare_prize.image  # Use direct URL, not .url
         })
 
     # Fill the rest of the prizes to ensure total is 6
@@ -122,17 +122,19 @@ def claw_machine(request):
         if selected_prize and (selected_rare_prize is None or selected_rare_prize.name != selected_prize.name):
             active_prizes.append({
                 'name': selected_prize.name,
-                'image': selected_prize.image.url
+                'image': selected_prize.image  # Use direct URL
             })
 
     # Combine built-in and database prizes
     all_prizes = built_in_prizes + active_prizes
 
+    # Shuffle the combined list to randomize positions
+    random.shuffle(all_prizes)
+
     # Return JSON if requested via API
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'prizes': all_prizes})
 
-    # Otherwise, render the HTML template
     return render(request, 'game/claw_machine.html', {'prizes': all_prizes})
 
 
@@ -193,42 +195,81 @@ def submit_score(request):
     return JsonResponse({'status': 'error'}, status=400)
 
 
+# @csrf_exempt
+# def upload_prizes(request):
+#     if request.method == 'POST':
+#         try:
+#             for file, name, probability in zip(
+#                 request.FILES.getlist('files'),
+#                 request.POST.getlist('prize_name'),
+#                 request.POST.getlist('probability')
+#             ):
+#                 if not name.strip():
+#                     return JsonResponse({'status': 'error', 'message': 'Prize name cannot be empty.'}, status=400)
+
+#                 # Create prize - the image will be automatically handled by Django
+#                 Prize.objects.create(
+#                     name=name.strip(),
+#                     probability=float(probability),
+#                     image=file  # Just pass the file directly
+#                 )
+
+#             return JsonResponse({'status': 'success', 'message': 'Prizes uploaded successfully!'})
+#         except Exception as e:
+#             logger.error(f"Error saving prize: {str(e)}")
+#             return JsonResponse({'status': 'error', 'message': f'Error saving prize: {str(e)}'}, status=500)
+
 @csrf_exempt
 def upload_prizes(request):
     if request.method == 'POST':
         try:
-            files = request.FILES.getlist('files')
-            prize_names = request.POST.getlist('prize_name')
-            probabilities = request.POST.getlist('probability')
-
-            # Validate data
-            if len(files) != len(prize_names) or len(files) != len(probabilities):
-                return JsonResponse({'status': 'error', 'message': 'Mismatch in data length.'}, status=400)
-
-            for file, name, probability in zip(files, prize_names, probabilities):
+            for file, name, probability in zip(
+                request.FILES.getlist('files'),
+                request.POST.getlist('prize_name'),
+                request.POST.getlist('probability')
+            ):
                 if not name.strip():
                     return JsonResponse({'status': 'error', 'message': 'Prize name cannot be empty.'}, status=400)
 
-                # Upload file to Supabase Storage
-                file_path = f"prizes/{file.name}"
-                supabase.storage().from_("bucket_name").upload(file_path, file.read())
+                # Generate a unique filename
+                ext = os.path.splitext(file.name)[1]
+                unique_filename = f"{str(uuid.uuid4())[:8]}{ext}"
+                
+                # Upload path should not include the bucket name
+                file_path = unique_filename  # Just the filename, no "prizes/" prefix
 
-                # Get public URL
-                image_url = supabase.storage().from_("bucket_name").get_public_url(file_path)
-
-                # Save prize with Supabase URL
-                prize, created = Prize.objects.get_or_create(
-                    name=name.strip(),
-                    defaults={
-                        'probability': float(probability),
-                        'image': image_url  # Store URL instead of file
-                    }
-                )
+                # Upload to Supabase
+                file_content = file.read()
+                
+                try:
+                    res = supabase.storage.from_("prizes").upload(
+                        path=file_path,
+                        file=file_content,
+                        file_options={"content-type": file.content_type}
+                    )
+                    
+                    # Construct the correct public URL
+                    image_url = f"{SUPABASE_URL}/storage/v1/object/public/prizes/{file_path}"
+                    
+                    # Save to database
+                    Prize.objects.create(
+                        name=name.strip(),
+                        probability=float(probability),
+                        image=image_url
+                    )
+                    
+                except Exception as upload_error:
+                    logger.error(f"Supabase upload error: {str(upload_error)}")
+                    return JsonResponse({
+                        'status': 'error', 
+                        'message': f'File upload failed: {str(upload_error)}'
+                    }, status=500)
 
             return JsonResponse({'status': 'success', 'message': 'Prizes uploaded successfully!'})
-
+            
         except Exception as e:
-            logger.error(f"Error saving prize: {e}")
-            return JsonResponse({'status': 'error', 'message': f'Error saving prize: {e}'}, status=500)
-
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
+            logger.error(f"Error saving prize: {str(e)}", exc_info=True)
+            return JsonResponse({
+                'status': 'error', 
+                'message': f'Error: {str(e)}'
+            }, status=500)

@@ -447,11 +447,11 @@
                                 <div class="card-content">
                                     <div class="card-image-container">
                                         {% if prize.image %}
-                                            <img src="{{ prize.image.url }}" class="card-img-top" alt="{{ prize.name }}">
+                                            <img src="{{ prize.image }}" class="card-img-top" alt="{{ prize.name }}">
                                         {% else %}
                                             <img src="{% static 'images/error_image.png' %}" class="card-img-top" alt="Error Image">
                                         {% endif %}
-                                    </div>
+                                    </div>                                    
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <h6 class="card-title mb-0">{{ prize.name }}</h6>

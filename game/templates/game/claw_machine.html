@@ -473,42 +473,42 @@
             </div>
         </div>
     
-        <div id="prize-floor"></div>
-    
-        {% if prizes %}
-        {% for prize in prizes %}
-            <div class="prize" style="display: none;">
-                {% if prize.image %}
-                    <img src="{{ prize.image.url }}" alt="{{ prize.name }}" class="prize-image">
-                {% endif %}
-            </div>
-        {% endfor %}
-        {% else %}
-            <div class="prize">
-                <img src="{% static 'prizes/Pink_Rabbit.png' %}" alt="Kairobot" class="prize-image">
-            </div>
-            <div class="prize">
-                <img src="{% static 'prizes/MisterX.png' %}" alt="MisterX" class="prize-image">
-            </div>
-            <div class="prize">
-                <img src="{% static 'prizes/Grizzly.png' %}" alt="Grizzly" class="prize-image">
-            </div>
-            <div class="prize">
-                <img src="{% static 'prizes/Wairobot.png' %}" alt="Wairobot" class="prize-image">
-            </div>
-        {% endif %}
-    
-
-    <div id="game-over">
-        <h2>Time's Up!</h2>
-        <span>You collected <span id="final-score">0</span> prizes!</span>
-        <div class="input-container">
-            <input type="text" id="player-name" placeholder="Enter your name" required style="text-align: center;">
+        <div id="prize-floor">
+            {% if prizes %}
+                {% for prize in prizes %}
+                    <div class="prize" data-name="{{ prize.name }}" style="display: none;">
+                        <img src="{{ prize.image }}" alt="{{ prize.name }}" class="prize-image">
+                    </div>
+                {% endfor %}
+            {% else %}
+                <!-- Fallback if no prizes are available -->
+                <div class="prize">
+                    <img src="{% static 'prizes/Pink_Rabbit.png' %}" alt="Pink Rabbit" class="prize-image">
+                </div>
+                <div class="prize">
+                    <img src="{% static 'prizes/MisterX.png' %}" alt="MisterX" class="prize-image">
+                </div>
+                <div class="prize">
+                    <img src="{% static 'prizes/Grizzly.png' %}" alt="Grizzly" class="prize-image">
+                </div>
+                <div class="prize">
+                    <img src="{% static 'prizes/Wairobot.png' %}" alt="Wairobot" class="prize-image">
+                </div>
+            {% endif %}
         </div>
-        <div class="button-container">
-            <button id="submit-btn" class="btn" type="button" onclick="submitScore()">SUBMIT &nbsp;<i class="fa-solid fa-paper-plane"></i></button>
+    
+        <div id="game-over">
+            <h2>Time's Up!</h2>
+            <span>You collected <span id="final-score">0</span> prizes!</span>
+            <div class="input-container">
+                <input type="text" id="player-name" placeholder="Enter your name" required style="text-align: center;">
+            </div>
+            <div class="button-container">
+                <button id="submit-btn" class="btn" type="button" onclick="submitScore()">SUBMIT &nbsp;<i class="fa-solid fa-paper-plane"></i></button>
+            </div>
         </div>
     </div>
+    
 
     </div>
     <div id="controls-container" >
