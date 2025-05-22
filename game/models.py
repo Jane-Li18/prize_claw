@@ -14,10 +14,15 @@ class Prize(models.Model):
     image = models.URLField(max_length=500)
     probability = models.FloatField(default=1.0)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)  # Add this field for soft deletion
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({'Active' if self.is_active else 'Inactive'})"
 
+    def delete(self, *args, **kwargs):
+        """Override delete to implement soft delete"""
+        self.is_active = False
+        self.save()
 
 
 class Game(models.Model):

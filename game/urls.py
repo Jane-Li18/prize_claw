@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import claw_machine, main, submit_score, prize, feedback, submit_feedback, upload_prizes
+from .views import claw_machine, main, submit_score, prize, feedback, submit_feedback, upload_prizes, magic_eight_ball
 
 urlpatterns = [
     path('', main, name='main'),
@@ -9,4 +9,5 @@ urlpatterns = [
     path('feedback/', feedback, name='feedback'),
     path('submit-feedback/', submit_feedback, name='submit_feedback'),
     path('upload-prizes/', upload_prizes, name='upload_prizes'),
+    path('magic-eight-ball/', magic_eight_ball, name='magic_eight_ball'),  # Changed here
 ]

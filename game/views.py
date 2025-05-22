@@ -273,3 +273,12 @@ def upload_prizes(request):
                 'status': 'error', 
                 'message': f'Error: {str(e)}'
             }, status=500)
+
+
+
+
+def magic_eight_ball(request):
+    # Fetch only prizes with probability > 0.1
+    prizes = Prize.objects.filter(probability__gt=0.0)
+    leaderboard = Leaderboard.objects.order_by('-score')[:10]
+    return render(request, 'game/main.html', {'prizes': prizes, 'leaderboard': leaderboard})
